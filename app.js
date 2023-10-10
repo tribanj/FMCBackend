@@ -11,6 +11,7 @@ const mailer = require("./helper/mail.js");
 const options = require("./database/get-more-college-options.js");
 const register = require("./database/register.js");
 
+  
 const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
@@ -63,12 +64,13 @@ app.post("/login", async (req, resp) => {
     //entered username
     let result = await usernameExist(username);
     if (result.status == 404) {
-      console.log(result.message);
+      return resp.status(404).send("Invalid creadentails");
     } else {
       let db_password = await getPasswordFromUsername(username);
       let matched = await bcrypt.compare(password, db_password);
-      if (!matched) {
-        console.log("Entered wrong password!");
+
+      if (matched == false) {
+        return resp.status(404).send("Entered wrong password!");
       } else {
         let data = { name: username };
         let token = await jwt.createToken(data);
@@ -80,13 +82,12 @@ app.post("/login", async (req, resp) => {
     // entered email
     let result = await emailExist(email);
     if (result.status == 404) {
-      console.log(result.message);
+      return resp.status(404).send("Invalid creadentails");
     } else {
       let db_password = await getPasswordFromEmail(email);
       let matched = await bcrypt.compare(password, db_password);
       if (!matched) {
-        console.log("Entered wrong password!");
-        resp.send("Entered wrong password!");
+        return resp.status(404).send("Entered wrong password!");
       } else {
         let data = { name: username };
         let token = await jwt.createToken(data);
