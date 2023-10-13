@@ -1,26 +1,38 @@
 var mongoose = require("mongoose");
 
 let Schema = new mongoose.Schema({
-  name: { type: String },
-  email: { type: String },
-  mobile: { type: String },
-  bouchre: {type:String}
+    image:{type:String},
+    name:{type:String},
+    email:{type:String},
+    comment:{type:String},
+    course:{type:String},
+    AdmissionDetails:{type:String},
+    exceldata:{type:String},
+    bouchre:{type:String}
 });
 
 
 const collection = new mongoose.model("collegeinfo", Schema);
 
 insert = async (
-  name,
-  email,
-  mobile,
-  bouchre
+   image,
+    name,
+    email,
+    comment,
+    course,
+    AdmissionDetails,
+    exceldata,
+    bouchre
 ) => {
   try {
     const options = new collection({
+      image: image,
       name: name,
       email: email,
-      mobile: mobile,
+      comment: comment,
+      course: course,
+      AdmissionDetails: AdmissionDetails,
+      exceldata:exceldata,
       bouchre:bouchre
     });
     await options.save();

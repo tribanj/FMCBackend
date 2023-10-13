@@ -13,12 +13,16 @@ const register = require("./database/register.js");
 const college = require('./database/registercollege.js')
 const multer = require('multer')
 const app = express();
+const compression = require('compression');
 // app.use(express.static(__dirname + '/public'));
 // app.use('/uploads', express.static('uploads'));
 app.use(express.json());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 app.use(cors());
+// app.use(compression());
+
 
 
 
@@ -29,25 +33,31 @@ const upload = multer({
         cb(null,'./public/uploads')
     },
       filename:function(res,file,cb){
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e5)
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
           cb(null, file.fieldname + '-' + uniqueSuffix+file.originalname)
       }
   })
 });
 
-app.post('/collegeinfo',upload.single('bouchre'),async(req,res)=>{
+app.post('/collegeinfo',upload.fields([{name:'bouchre',maxCount:1},{name:'exceldata',maxCount:1}]),async(req,res,next)=>{
   const {
+    image,
     name,
     email,
-    mobile,
-    // bouchre,
+    comment,
+    course,
+    AdmissionDetails,
   } = req.body;
 
   const result = await college.insert(
+    image,
     name,
     email,
-    mobile,
-    req.file.filename
+    comment,
+    course,
+    AdmissionDetails,
+    req.files['exceldata'][0].filename,
+    req.files['bouchre'][0].filename,
   );
   res.send(result);
 })
