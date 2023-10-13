@@ -10,13 +10,47 @@ const bcrypt = require("./helper/getHashPass.js");
 const mailer = require("./helper/mail.js");
 const options = require("./database/get-more-college-options.js");
 const register = require("./database/register.js");
-
-  
+const college = require('./database/registercollege.js')
+const multer = require('multer')
 const app = express();
+// app.use(express.static(__dirname + '/public'));
+// app.use('/uploads', express.static('uploads'));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors());
+
+
+
+const upload = multer({
+  storage:multer.diskStorage({
+    destination:function(req,file,cb)
+    {
+        cb(null,'./public/uploads')
+    },
+      filename:function(res,file,cb){
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e5)
+          cb(null, file.fieldname + '-' + uniqueSuffix+file.originalname)
+      }
+  })
+});
+
+app.post('/collegeinfo',upload.single('bouchre'),async(req,res)=>{
+  const {
+    name,
+    email,
+    mobile,
+    // bouchre,
+  } = req.body;
+
+  const result = await college.insert(
+    name,
+    email,
+    mobile,
+    req.file.filename
+  );
+  res.send(result);
+})
 
 app.post("/register", async (req, resp) => {
   let { name, mobile, location } = req.body;
@@ -119,26 +153,14 @@ app.post("/get-more-college-options", async (req, resp) => {
     name,
     email,
     mobile,
-    street,
-    state,
-    zip,
-    country,
-    level,
-    stream,
-    course,
+    bouchre,
   } = req.body;
 
   const result = await options.insert(
     name,
     email,
     mobile,
-    street,
-    state,
-    zip,
-    country,
-    level,
-    stream,
-    course
+    bouchre
   );
   resp.send(result);
 });
