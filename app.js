@@ -13,15 +13,14 @@ const register = require("./database/register.js");
 const college = require('./database/registercollege.js')
 const multer = require('multer')
 const app = express();
-const compression = require('compression');
-// app.use(express.static(__dirname + '/public'));
-// app.use('/uploads', express.static('uploads'));
+
+const continueAuth = require('./database/continueAuth.js')
+
 app.use(express.json());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 app.use(cors());
-// app.use(compression());
 
 
 
@@ -39,6 +38,13 @@ const upload = multer({
   })
 });
 
+app.post('/userprofile',async(req,res)=>{
+  const getuser = await getUser(req.body.userid);
+  if(getuser.status == 404)
+  return res.status(404).send(getuser.message);
+  else
+  return res.status(200).send(getuser.message);
+})
 app.post('/collegeinfo',upload.fields([{name:'bouchre',maxCount:1},{name:'exceldata',maxCount:1}]),async(req,res,next)=>{
   const {
     image,
@@ -68,7 +74,16 @@ app.post("/register", async (req, resp) => {
   console.log(res);
   resp.send(res);
 });
-
+app.post("/googleAuth", async (req, resp) => {
+  let { name, email, image } = req.body;
+  const check = await isalreadyAuth(email);
+  if(!check){
+  check = await continueAuth.insert(name, email, image);
+  }
+  resp.json(check);
+  // console.log(res);
+  // resp.send(res);
+});
 app.post("/signup", async (req, resp) => {
   let { username, firstname, lastname, email, password, cpassword } = req.body;
   const name = firstname + " " + lastname;

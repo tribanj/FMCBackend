@@ -17,7 +17,7 @@ const collection = new mongoose.model("collegeinfo", Schema);
 insert = async (
    image,
     name,
-    email,
+    email, 
     comment,
     course,
     AdmissionDetails,
